@@ -307,10 +307,29 @@ db.students.aggregate([{
 db.students.find({
     $or: [{parents: {$size: 1}}, {parents: null}]
 })
-// 13) Знайти батьків які не працюють
+// 13) Знайти учнів в яких є батьки без роботи не працюють
 db.students.find({
-    'parents.profession': null
+    $and:[{'parents.profession': null},
+        {parents:{$exists:1}}]
+
 })
+// 13) Знайти батьків які не працюють
+db.students.aggregate([
+    {
+        $unwind:'$parents'
+    },
+    {
+        $match:{
+            'parents.profession':null
+        }
+    },
+    {
+        $project:{
+            parentName:'$parents.name',
+            parentGander:'$parents.gender',
+        }
+    }
+])
 // 14) Вигнати дітей, які мають середній бал менше ніж 2.5
 db.students.deleteMany({
     avgScore: {$lt: 2.5}
